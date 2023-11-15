@@ -3,9 +3,9 @@ import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ForkJoinPool;
 
 public class Strassen extends RecursiveTask<int[][]> {
-    private int[][] A;
-    private int[][] B;
-    private int size;
+    private final int[][] A;  // Matrice A
+    private final int[][] B;  // Matrice B
+    private final int size;   // Taille des matrices
 
     public Strassen(int[][] A, int[][] B, int size) {
         this.A = A;
@@ -18,18 +18,23 @@ public class Strassen extends RecursiveTask<int[][]> {
         if (size > 1) { // Utiliser l'algorithme de Strassen pour toutes les tailles de matrices
             int newSize = size / 2;
 
+            // On divise A en 4 matrices
             int[][] A11 = new int[newSize][newSize];
             int[][] A12 = new int[newSize][newSize];
             int[][] A21 = new int[newSize][newSize];
             int[][] A22 = new int[newSize][newSize];
+
+            // On divise B en 4 matrices
             int[][] B11 = new int[newSize][newSize];
             int[][] B12 = new int[newSize][newSize];
             int[][] B21 = new int[newSize][newSize];
             int[][] B22 = new int[newSize][newSize];
 
-            splitMatrix(A, A11, A12, A21, A22);
-            splitMatrix(B, B11, B12, B21, B22);
+            // On remplit les matrices crées précedemment
+            splitMatrix(A, A11, A12, A21, A22, newSize);
+            splitMatrix(B, B11, B12, B21, B22, newSize);
 
+            // Mise en place de la récursivité
             Strassen p1 = new Strassen(sum(A11, A22), sum(B11, B22), newSize);
             Strassen p2 = new Strassen(sum(A21, A22), B11, newSize);
             Strassen p3 = new Strassen(A11, subtract(B12, B22), newSize);
@@ -38,6 +43,7 @@ public class Strassen extends RecursiveTask<int[][]> {
             Strassen p6 = new Strassen(subtract(A21, A11), sum(B11, B12), newSize);
             Strassen p7 = new Strassen(subtract(A12, A22), sum(B21, B22), newSize);
 
+            // Calculs en parallèle
             p1.fork();
             p2.fork();
             p3.fork();
@@ -46,32 +52,24 @@ public class Strassen extends RecursiveTask<int[][]> {
             p6.fork();
             p7.fork();
 
+            // Remplissage de la matrice résultat C
             int[][] C11 = subtract(sum(p1.join(), p4.join()), sum(p5.join(), p7.join()));
             int[][] C12 = sum(p3.join(), p5.join());
             int[][] C21 = sum(p2.join(), p4.join());
             int[][] C22 = subtract(sum(p1.join(), p3.join()), sum(p2.join(), p6.join()));
 
-            return collectMatrix(C11, C12, C21, C22);
+            return collectMatrix(C11, C12, C21, C22, newSize);
         } else {
-            // Utiliser l'algorithme de multiplication de matrices standard pour les petites tailles
-            return multiplyMatrix(A, B);
+            // Si matrice donnée de taille 1, multiplication normale de matrice
+            int[][] C = new int[1][1];
+            C[0][0] = A[0][0] * B[0][0];
+            return C;
         }
     }
 
-    private int[][] multiplyMatrix(int[][] A, int[][] B) {
-        int n = A.length;
-        int[][] C = new int[n][n];
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                for (int k = 0; k < n; k++)
-                    C[i][j] += A[i][k] * B[k][j];
-
-        return C;
-    }
-
-    private void splitMatrix(int[][] P, int[][] C11, int[][] C12, int[][] C21, int[][] C22) {
-        int newSize = P.length;
+    // Fonction permettant de divisier la matrice donnée en entrée dans 4 sous-matrices données elles même en paramètre
+    private void splitMatrix(int[][] P, int[][] C11, int[][] C12, int[][] C21, int[][] C22, int newSize) {
 
         for (int i = 0; i < newSize; i++)
             for (int j = 0; j < newSize; j++) {
@@ -82,21 +80,23 @@ public class Strassen extends RecursiveTask<int[][]> {
             }
     }
 
-    private int[][] collectMatrix(int[][] C11, int[][] C12, int[][] C21, int[][] C22) {
-        int newSize = C11.length * 2;
+    // Fonction permettant de réunir les sous-matrices en une seule matrice
+    private int[][] collectMatrix(int[][] C11, int[][] C12, int[][] C21, int[][] C22, int oldSize) {
+        int newSize = oldSize * 2;
         int[][] result = new int[newSize][newSize];
 
-        for (int i = 0; i < newSize / 2; i++)
-            for (int j = 0; j < newSize / 2; j++) {
+        for (int i = 0; i < oldSize; i++)
+            for (int j = 0; j < oldSize; j++) {
                 result[i][j] = C11[i][j];
-                result[i][j + newSize / 2] = C12[i][j];
-                result[i + newSize / 2][j] = C21[i][j];
-                result[i + newSize / 2][j + newSize / 2] = C22[i][j];
+                result[i][j + oldSize] = C12[i][j];
+                result[i + oldSize][j] = C21[i][j];
+                result[i + oldSize][j + oldSize] = C22[i][j];
             }
 
         return result;
     }
 
+    // Fonction permettant d'effectuer la somme de deux matrices
     private int[][] sum(int[][] A, int[][] B) {
         int n = A.length;
         int[][] C = new int[n][n];
@@ -108,6 +108,7 @@ public class Strassen extends RecursiveTask<int[][]> {
         return C;
     }
 
+    // Fonction permettant d'effectuer la soustraction de deux matrices
     private int[][] subtract(int[][] A, int[][] B) {
         int n = A.length;
         int[][] C = new int[n][n];
