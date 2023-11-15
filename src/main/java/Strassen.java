@@ -2,11 +2,29 @@ import java.util.Random;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ForkJoinPool;
 
+/**
+ * Classe permettant mettant en place l'algorithme de Strassen
+ */
 public class Strassen extends RecursiveTask<int[][]> {
+    /**
+     * Définition de la première matrice
+     */
     private final int[][] A;  // Matrice A
+    /**
+     * Définition de la deuxième matrice
+     */
     private final int[][] B;  // Matrice B
+    /**
+     * Définition de la taille de ces matrices
+     */
     private final int size;   // Taille des matrices
 
+    /**
+     * Constructeur de classe
+     * @param A Matrice A
+     * @param B Matrice B
+     * @param size Taille des matrices
+     */
     public Strassen(int[][] A, int[][] B, int size) {
         this.A = A;
         this.B = B;
@@ -67,8 +85,15 @@ public class Strassen extends RecursiveTask<int[][]> {
         }
     }
 
-
-    // Fonction permettant de divisier la matrice donnée en entrée dans 4 sous-matrices données elles même en paramètre
+    /**
+     * Fonction permettant de divisier la matrice donnée en entrée dans 4 sous-matrices données elles même en paramètre
+     * @param P Matrice à diviser
+     * @param C11 Première sous-matrice
+     * @param C12 Deuxième sous-matrice
+     * @param C21 Troisième sous-matrice
+     * @param C22 Quatrième sous-matrice
+     * @param newSize Taille des sous-matrices
+     */
     private void splitMatrix(int[][] P, int[][] C11, int[][] C12, int[][] C21, int[][] C22, int newSize) {
 
         for (int i = 0; i < newSize; i++)
@@ -80,7 +105,15 @@ public class Strassen extends RecursiveTask<int[][]> {
             }
     }
 
-    // Fonction permettant de réunir les sous-matrices en une seule matrice
+    /**
+     * Fonction permettant de réunir les sous-matrices en une seule matrice
+     * @param C11 Première matrice (en haut à gauche)
+     * @param C12 Deuxième matrice (en haut à droite)
+     * @param C21 Troisième matrice (en bas à gauche)
+     * @param C22 Quatrième matrice (en bas à droite)
+     * @param oldSize Taille des matrices
+     * @return Super-matrice résultat de la fusion de ces quatre matrices
+     */
     private int[][] collectMatrix(int[][] C11, int[][] C12, int[][] C21, int[][] C22, int oldSize) {
         int newSize = oldSize * 2;
         int[][] result = new int[newSize][newSize];
@@ -96,7 +129,12 @@ public class Strassen extends RecursiveTask<int[][]> {
         return result;
     }
 
-    // Fonction permettant d'effectuer la somme de deux matrices
+    /**
+     * Fonction permettant d'effectuer la somme de deux matrices
+     * @param A Première matrice
+     * @param B Deuxième matrice
+     * @return Matrice stockant le résultat de l'addition
+     */
     private int[][] sum(int[][] A, int[][] B) {
         int n = A.length;
         int[][] C = new int[n][n];
@@ -108,7 +146,12 @@ public class Strassen extends RecursiveTask<int[][]> {
         return C;
     }
 
-    // Fonction permettant d'effectuer la soustraction de deux matrices
+    /**
+     * Fonction permettant d'effectuer la soustraction de deux matrices
+     * @param A Première matrice
+     * @param B Deuxième matrice
+     * @return Matrice stockant le résultat de la soustraction
+     */
     private int[][] subtract(int[][] A, int[][] B) {
         int n = A.length;
         int[][] C = new int[n][n];
@@ -121,7 +164,12 @@ public class Strassen extends RecursiveTask<int[][]> {
     }
 
 
-
+    /**
+     * Fonction permettant de vérifier la possibilité d'usage de l'algorithme de Strassen
+     * @param A Première matrice à multiplier
+     * @param B Deuxième matrice à multiplier
+     * @return Usage de l'algorithme (si usage possible)
+     */
     public static int[][] strassenMatrixMultiplication(int[][] A, int[][] B) {
         int n = A.length;
 
@@ -133,6 +181,10 @@ public class Strassen extends RecursiveTask<int[][]> {
     }
 
 
+    /**
+     * Main
+     * @param args Arguments
+     */
     public static void main(String[] args) {
         Random random = new Random();
         int matrixSize = 2;
@@ -152,7 +204,12 @@ public class Strassen extends RecursiveTask<int[][]> {
         printMatrix(result);
     }
 
-    // Fonction permettant de générer un matrice aléatoire de taille donnée (en paramètre)
+    /**
+     * Fonction permettant de générer un matrice aléatoire de taille donnée (en paramètre)
+     * @param size Taille de la matrice à créer
+     * @param random Randomizer
+     * @return Matrice créée
+     */
     public static int[][] generateRandomMatrix(int size, Random random) {
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++)
@@ -161,7 +218,10 @@ public class Strassen extends RecursiveTask<int[][]> {
         return matrix;
     }
 
-    // Fonction permettant d'afficher une matrice
+    /**
+     * Fonction permettant d'afficher une matrice
+     * @param matrix Matrice à afficher
+     */
     public static void printMatrix(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
