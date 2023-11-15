@@ -71,10 +71,10 @@ public class Strassen extends RecursiveTask<int[][]> {
             p7.fork();
 
             // Remplissage de la matrice résultat C
-            int[][] C11 = subtract(sum(p1.join(), p4.join()), sum(p5.join(), p7.join()));
+            int[][] C11 = subtract(sum(sum(p1.join(), p4.join()), p7.join()), p5.join());
             int[][] C12 = sum(p3.join(), p5.join());
             int[][] C21 = sum(p2.join(), p4.join());
-            int[][] C22 = subtract(sum(p1.join(), p3.join()), sum(p2.join(), p6.join()));
+            int[][] C22 = subtract(sum(sum(p1.join(), p3.join()), p6.join()), p2.join());
 
             return collectMatrix(C11, C12, C21, C22, newSize);
         } else {
@@ -187,7 +187,7 @@ public class Strassen extends RecursiveTask<int[][]> {
      */
     public static void main(String[] args) {
         Random random = new Random();
-        int matrixSize = 2;
+        int matrixSize = 8;
 
         int[][] A = generateRandomMatrix(matrixSize, random);
         int[][] B = generateRandomMatrix(matrixSize, random);
