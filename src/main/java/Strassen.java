@@ -146,19 +146,13 @@ public class Strassen extends RecursiveTask<int[][]> {
         System.out.println("Matrice B :");
         printMatrix(B);
 
-        long startTime = System.nanoTime();
-
         int[][] result = strassenMatrixMultiplication(A, B);
-
-        long endTime = System.nanoTime();
-        long executionTime = (endTime - startTime) / 1_000_000;
 
         System.out.println("Résultat de la multiplication :");
         printMatrix(result);
-
-        System.out.println("Temps d'exécution : " + executionTime + " millisecondes");
     }
 
+    // Fonction permettant de générer un matrice aléatoire de taille donnée (en paramètre)
     public static int[][] generateRandomMatrix(int size, Random random) {
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++)
@@ -167,6 +161,7 @@ public class Strassen extends RecursiveTask<int[][]> {
         return matrix;
     }
 
+    // Fonction permettant d'afficher une matrice
     public static void printMatrix(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
